@@ -1,10 +1,13 @@
 const express = require("express")
 const authController = require("../controllers/auth.controller")
+const authMiddleware = require("../middlewares/auth.middleware")
 
-const routes = express.Router()
+const router = express.Router()
 
-routes.post("/register", authController.registerUserController)
-routes.post("/login", authController.loginUserController)
+router.post("/register", authController.registerUserController)
+router.post("/login", authController.loginUserController)
+router.get("/get-me", authMiddleware.authUser, authController.getMeController)
+router.post("/logout", authController.logoutUserController)
 
 
-module.exports = routes
+module.exports = router

@@ -1,6 +1,7 @@
 const userModel = require("../models/user.model")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const blacklistModel = require("../models/blacklist.model")
 
 async function registerUserController(req, res) {
     const { username, email, password } = req.body
@@ -51,27 +52,27 @@ async function registerUserController(req, res) {
 
 }
 
-async function loginUserController(req,res){
-    const {username,email,password} = req.body
+async function loginUserController(req, res) {
+    const { username, email, password } = req.body
 
     const user = await userModel.findOne({
-        $or:[
-            {username},
-            {email}
+        $or: [
+            { username },
+            { email }
         ]
-    })
+    }).select("+password")
 
-    if(!user){
+    if (!user) {
         return res.status(400).json({
-            message:"Invalid Credentials"
+            message: "Invalid Credentials"
         })
     }
 
-    const isPasswordValid = await bcrypt.compare(password,user.password)
+    const isPasswordValid = await bcrypt.compare(password, user.password)
 
-    if(!isPasswordValid){
+    if (!isPasswordValid) {
         return res.status(400).json({
-            message:"Invalid Credentials"
+            message: "Invalid Credentials"
         })
     }
 
@@ -98,7 +99,39 @@ async function loginUserController(req,res){
 
 }
 
+async function getMeController(req, res) {
+    const user = await userModel.findById(req.user.id)
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found"
+        })
+    }
+
+    return res.status(200).json({
+        message: "User fetched successfully",
+        user
+    })
+}
+
+async function logoutUserController(req, res) {
+    const token = req.cookies.token
+
+    res.clearCookie("token")
+
+    await blacklistModel.create({
+        token
+    })
+
+    return res.status(200).json({
+        message: "logout successfully"
+    })
+}
+
 module.exports = {
     registerUserController,
-    loginUserController
+    loginUserController,
+    getMeController,
+    logoutUserController
+
 }
