@@ -5,7 +5,7 @@ const FormGroup = ({ placeholder, value, onChange, name, type }) => {
         <input
             value={value}
             onChange={onChange}
-            type={type || "text"} name={name} placeholder={placeholder} required />
+            type={type} name={name} placeholder={placeholder} required />
     )
 }
 
